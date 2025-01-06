@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    .region { fill: lightgray; stroke: white; }
+    .hover { fill: orange; }
+    text { font-family: Arial, sans-serif; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <script>
+    const width = 800, height = 800;
+    const svg = d3.select("body").append("svg").attr("width", width).attr("height", height);
+
+    const regionNameDisplay = d3.select("body").append("div")
+      .style("position", "absolute")
+      .style("left", `${width + 20}px`)
+      .style("top", "20px")
+      .style("font-size", "16px")
+      .text("Hover over a region");
+
+    d3.json("germany-25-wahlkreise.geojson").then(data => {
+      const projection = d3.geoMercator().fitSize([width, height], data);
+      const path = d3.geoPath().projection(projection);
+
+      svg.selectAll(".region")
+        .data(data.features)
+        .join("path")
+        .attr("d", path)
+        .attr("class", "region")
+        .on("mouseover", function (event, d) {
+          d3.select(this).classed("hover", true);
+          console.log(d.properties);
+          const regionName = d.properties.WKR_NAME;
+          regionNameDisplay.text(regionName || "Unknown Region");
+        })
+        .on("mouseout", function () {
+          d3.select(this).classed("hover", false);
+          regionNameDisplay.text("Hover over a region");
+        });
+    });
+  </script>
+</body>
+</html>
+
